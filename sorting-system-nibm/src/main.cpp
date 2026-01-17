@@ -1,26 +1,27 @@
 #include <Arduino.h>
 
-#include "utils/ColorSensor.h"
+#include "ObjectManager.h"
 
 ColorSensor cs = ColorSensor_Create(2, 3, 4);
+IrSensor ir = IrSensor_Create(7);
+
+ObjectManager objMng = ObjectManager_Create(ir, cs);
 
 void setup()
 {
     Serial.begin(9600);
-    ColorSensor_Init(cs);
+    ObjectManager_Init(objMng);
 }
 
 void loop()
 {
-    if (Serial.available())
+    ObjectManager_Update(objMng);
+
+    if (ObjectManager_IsEventTrue(objMng))
     {
-        char ch = Serial.read();
-        if (ch == 'r') // for example, type 'r' to trigger
-        {
-            Color c = ColorSensor_DetectColor(cs);
-            Serial.println(c == Color::RED ? "RED" : c == Color::GREEN ? "GREEN"
-                                                 : c == Color::BLUE    ? "BLUE"
-                                                                       : "NONE");
-        }
+        Color cl = ObjectManager_GetColor(objMng);
+        Serial.println(cl == Color::RED ? "RED" : cl == Color::BLUE ? "BLUE"
+                                              : cl == Color::GREEN  ? "GREEN"
+                                                                    : "404");
     }
 }
