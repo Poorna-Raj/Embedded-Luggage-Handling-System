@@ -112,8 +112,27 @@ enum class ObjectState {
 
 - Return to the IDLE state after completing detection and reporting.
 
-### Notes:
+### Notes
 
 - The Object Manager acts as an FSM, transitioning between states automatically based on sensor readings.
 
 - It abstracts the hardware details of the sensors from the Sorting Manager, providing a clean interface for object detection and color reporting.
+
+## Design the Servo Motor Structure
+
+### Purpose
+The Servo Motor is responsible for pushing objects on the conveyor belt into their corresponding bins.
+
+### Responsibilities
+
+- Receive a trigger signal (e.g., from the Object Manager or IR sensor) to actuate and push the object.
+
+- Automatically return to the reset/home position after a predefined duration or once the push action is complete.
+
+- Provide smooth and reliable motion to ensure objects are pushed accurately without damaging them or the system.
+
+### Notes
+
+- The servo motor should abstract the mechanical details from higher-level modules (e.g., Sorting Manager).
+
+- Timing or duration can be configured depending on the object size or speed of the conveyor.
