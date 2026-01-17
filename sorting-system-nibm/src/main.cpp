@@ -1,18 +1,26 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include "utils/ColorSensor.h"
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+ColorSensor cs = ColorSensor_Create(2, 3, 4);
+
+void setup()
+{
+    Serial.begin(9600);
+    ColorSensor_Init(cs);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+void loop()
+{
+    if (Serial.available())
+    {
+        char ch = Serial.read();
+        if (ch == 'r') // for example, type 'r' to trigger
+        {
+            Color c = ColorSensor_DetectColor(cs);
+            Serial.println(c == Color::RED ? "RED" : c == Color::GREEN ? "GREEN"
+                                                 : c == Color::BLUE    ? "BLUE"
+                                                                       : "NONE");
+        }
+    }
 }
