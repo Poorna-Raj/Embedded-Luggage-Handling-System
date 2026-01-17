@@ -136,3 +136,68 @@ The Servo Motor is responsible for pushing objects on the conveyor belt into the
 - The servo motor should abstract the mechanical details from higher-level modules (e.g., Sorting Manager).
 
 - Timing or duration can be configured depending on the object size or speed of the conveyor.
+
+## Implement the Object Manager
+- Perform the physical testing ensuring all the states working properly.
+- Ensure safe transistions between the states, so it won't trigger duplicate events.
+- Test code is included - [code](test.md#object-manager)
+
+> Had an issue where the color sensor get triggered twise per movement,
+
+To fix this issue, few changes has been implemented.
+```cpp
+bool ObjectManager_IsEventTrue(ObjectManager &omn)
+{
+    if (omn.state == ObjManagerState::DETECTED && !omn.eventConsumed)
+    {
+        omn.preColor = omn.color;
+        omn.eventConsumed = true;
+        return true;
+    }
+    return false;
+}
+```
+- Add a flag to the `ObjectManager_IsEventTrue()` function without the immediate state change.
+```cpp
+void handleDetectedState(ObjectManager &omn)
+{
+    if (!omn.detectedPrinted)
+    {
+        omn.detectedPrinted = true;
+    }
+
+    if (omn.eventConsumed && !IrSensor_IsDetected(omn.ir))
+    {
+        omn.state = ObjManagerState::IDLE;
+        omn.detectedPrinted = false;
+        omn.failedPrinted = false;
+        omn.eventConsumed = false;
+    }
+}
+```
+- Check weather the event is consumed and the object had been moved before resetting the state to `IDLE`.
+
+## Add debounce to the IR Sensor
+To get a more precise reading, the debounce has been implemented with a `busy falg`. Otherwise the IR sensor will detect multiple trigger per same movement.
+```cpp
+void IrSensor_Update(IrSensor &ir)
+{
+    if (!ir.initialized)
+        return;
+
+    ir.current = digitalRead(ir.gpio);
+
+    if (!ir.event)
+    {
+        if (!ir.current && ir.previous && (millis() - ir.lastEventTime > ir.debounceMs))
+        {
+            ir.event = true;
+            ir.lastEventTime = millis();
+        }
+    }
+
+    ir.previous = ir.current;
+}
+```
+- If an event is already stored, it won't look for another event till the stored event got consumed.
+- The debounce done in the conditinoal block so it will be more consistant.
