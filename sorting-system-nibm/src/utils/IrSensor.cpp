@@ -8,6 +8,9 @@ IrSensor IrSensor_Create(const uint8_t gpio)
         .previous = false,
         .event = false,
         .initialized = false,
+        .busy = false,
+        .lastEventTime = 0,
+        .debounceMs = 500,
     };
 }
 
@@ -27,9 +30,13 @@ void IrSensor_Update(IrSensor &ir)
 
     ir.current = digitalRead(ir.gpio);
 
-    if (!ir.current && ir.previous)
+    if (!ir.event)
     {
-        ir.event = true;
+        if (!ir.current && ir.previous && (millis() - ir.lastEventTime > ir.debounceMs))
+        {
+            ir.event = true;
+            ir.lastEventTime = millis();
+        }
     }
 
     ir.previous = ir.current;

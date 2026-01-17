@@ -11,6 +11,10 @@ struct IrSensor
     bool event;
 
     bool initialized;
+
+    bool busy;
+    unsigned long lastEventTime;
+    const unsigned long debounceMs;
 };
 
 IrSensor IrSensor_Create(const uint8_t gpio);
