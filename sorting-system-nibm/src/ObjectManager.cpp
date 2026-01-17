@@ -15,6 +15,7 @@ ObjectManager ObjectManager_Create(IrSensor &ir, ColorSensor &cs)
         .initialized = false,
         .detectedPrinted = false,
         .failedPrinted = false,
+        .eventConsumed = false,
     };
 }
 
@@ -57,7 +58,6 @@ void handleIdleState(ObjectManager &omn)
 {
     if (IrSensor_IsEventTrue(omn.ir))
     {
-        Serial.println("IR detected");
         Color color = ColorSensor_DetectColor(omn.cs);
         if (color != Color::NONE)
         {
@@ -75,11 +75,15 @@ void handleDetectedState(ObjectManager &omn)
 {
     if (!omn.detectedPrinted)
     {
-        Serial.print("Color detected by Object Manager: ");
-        Serial.println(omn.color == Color::RED ? "RED" : omn.color == Color::BLUE ? "BLUE"
-                                                     : omn.color == Color::GREEN  ? "GREEN"
-                                                                                  : "404");
         omn.detectedPrinted = true;
+    }
+
+    if (omn.eventConsumed && !IrSensor_IsDetected(omn.ir))
+    {
+        omn.state = ObjManagerState::IDLE;
+        omn.detectedPrinted = false;
+        omn.failedPrinted = false;
+        omn.eventConsumed = false;
     }
 }
 
@@ -94,15 +98,10 @@ void handleFailedState(ObjectManager &omn)
 
 bool ObjectManager_IsEventTrue(ObjectManager &omn)
 {
-    if (omn.state == ObjManagerState::DETECTED && omn.color != Color::NONE)
+    if (omn.state == ObjManagerState::DETECTED && !omn.eventConsumed)
     {
         omn.preColor = omn.color;
-        omn.color = Color::NONE;
-        omn.state = ObjManagerState::IDLE;
-
-        omn.detectedPrinted = false;
-        omn.failedPrinted = false;
-
+        omn.eventConsumed = true;
         return true;
     }
     return false;

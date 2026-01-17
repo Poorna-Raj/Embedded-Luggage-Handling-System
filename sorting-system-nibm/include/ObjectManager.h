@@ -23,6 +23,8 @@ struct ObjectManager
 
     bool detectedPrinted;
     bool failedPrinted;
+
+    bool eventConsumed;
 };
 
 ObjectManager ObjectManager_Create(IrSensor &ir, ColorSensor &cs);
