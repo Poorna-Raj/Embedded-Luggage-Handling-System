@@ -34,3 +34,16 @@ LED should act as an FSM (finite state machine) and be able to operate in differ
 2. STOP - stop the light up
 3. BLINK - should blink the LED
 4. ERROR - something went wrong
+
+# 2026-01-17
+
+## Test the LED
+- Perform physical testing for the LED covering all the states in the system.
+- Test code is also written - [code](test.md#led-test).
+- No issues have been founded.
+
+## Test the IR Sensor
+- Perform physical testing covering all the functions.
+- Check for edge detection as well as continuous state.
+- Test code is also written - [code](test.md#ir-sensor).
+- No issues have been founded.
