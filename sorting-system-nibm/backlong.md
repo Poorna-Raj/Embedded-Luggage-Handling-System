@@ -47,3 +47,44 @@ LED should act as an FSM (finite state machine) and be able to operate in differ
 - Check for edge detection as well as continuous state.
 - Test code is also written - [code](test.md#ir-sensor).
 - No issues have been founded.
+
+## Implement and Test Color Sensor
+
+### Implementation
+The Color Sensor is responsible for detecting one of three colors: **RED, GREEN, or BLUE**.
+
+- **Input Trigger:** The IR sensor signals object presence.
+  - **No direct polling or updating is required**
+  - The color sensor only reads when triggered.
+- **Color Detection Logic:**
+  - Classify the object as **RED**, **GREEN**, or **BLUE**.
+  - Return the detected color as an enum.
+- **Integration:**
+  - The Color Sensor does **not control the servo** directly.
+  - The SortingManager or controller module will use the detected color to decide which bin to push the object into.
+- **DONE WHEN:**
+  - The color sensor module exposes a single function:
+    ```c++
+    Color DetectColor(); // returns RED, GREEN, or BLUE
+
+    ```
+  - Works correctly for all test objects
+  - Only reads color **when the IR sensor signals presence**
+  - No repeated or continuous readings outside the trigger
+
+```c++
+enum class Color
+{
+    NONE,
+    RED,
+    GREEN,
+    BLUE
+};
+```
+
+### Testing
+- Perform physical testing covering all the functions.
+- Test code is also written - [code](test.md#color-sensor)
+- Issues / TODOs:
+    - [ ] Blocking Structure (//TODO)
+    - [ ] Default reading as RED
