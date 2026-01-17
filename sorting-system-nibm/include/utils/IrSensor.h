@@ -12,7 +12,6 @@ struct IrSensor
 
     bool initialized;
 
-    bool busy;
     unsigned long lastEventTime;
     const unsigned long debounceMs;
 };

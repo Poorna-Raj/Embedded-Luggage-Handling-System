@@ -8,7 +8,6 @@ IrSensor IrSensor_Create(const uint8_t gpio)
         .previous = false,
         .event = false,
         .initialized = false,
-        .busy = false,
         .lastEventTime = 0,
         .debounceMs = 500,
     };
