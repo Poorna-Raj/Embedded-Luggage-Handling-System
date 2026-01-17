@@ -88,3 +88,32 @@ enum class Color
 - Issues / TODOs:
     - [ ] Blocking Structure (//TODO)
     - [ ] Default reading as RED
+
+## Design the Object Manager
+
+### Purpose
+The Object Manager is responsible for detecting objects and identifying their colors. It serves as a subsystem for the Sorting Manager, providing information about detected objects and their colors for further processing.
+
+### Responsibilities
+
+- Monitor an IR sensor to detect the presence of an object.
+
+- Use a Color Sensor to determine the color of the detected object.
+
+- Maintain and update an internal finite state machine (FSM) with the following states:
+```cpp
+enum class ObjectState {
+    IDLE,      // No object detected
+    DETECTED,  // Object detected and color identified
+    FAILED     // Detection or color identification failed
+};
+```
+- Store the detected color internally and provide it to other modules (e.g., Sorting Manager).
+
+- Return to the IDLE state after completing detection and reporting.
+
+### Notes:
+
+- The Object Manager acts as an FSM, transitioning between states automatically based on sensor readings.
+
+- It abstracts the hardware details of the sensors from the Sorting Manager, providing a clean interface for object detection and color reporting.
