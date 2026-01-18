@@ -1,33 +1,64 @@
 #include <Arduino.h>
+#include "ObjectManager.h"
+#include "SortingManager.h"
 #include "utils/ServoMotor.h"
 
-// Adjust angles if needed
-constexpr uint8_t SERVO_PIN = 9;
-constexpr uint8_t RESET_ANGLE = 90;
-constexpr uint8_t PUSH_ANGLE = 30;
+// -------------------- Object Manager --------------------
+ColorSensor cs = ColorSensor_Create(2, 3, 4); // Pins for color sensor
+IrSensor ir = IrSensor_Create(7);             // Object detection IR
 
-ServoMotor servo = ServoMotor_Create(
-    SERVO_PIN,
-    RESET_ANGLE,
-    PUSH_ANGLE);
+ObjectManager objMng = ObjectManager_Create(ir, cs);
+
+// -------------------- Servo Motors --------------------
+constexpr uint8_t SERVO1_PIN = 5;  // Left bin
+constexpr uint8_t SERVO2_PIN = 11; // Right bin
+
+ServoMotor servo1 = ServoMotor_Create(SERVO1_PIN, 90, 30); // reset=90, push=30
+ServoMotor servo2 = ServoMotor_Create(SERVO2_PIN, 90, 30);
+
+// -------------------- Bin IR sensors --------------------
+IrSensor bin1Ir = IrSensor_Create(9);
+IrSensor bin2Ir = IrSensor_Create(10);
+IrSensor bin3Ir = IrSensor_Create(8); // End bin IR
+
+// -------------------- Hardware structs --------------------
+Hardware bin1 = {ir : bin1Ir, servo : servo1};
+Hardware bin2 = {ir : bin2Ir, servo : servo2};
+
+// -------------------- Sorting Manager --------------------
+SortingManager sorter = SortingManager_Create(bin1, bin2, bin3Ir, objMng);
 
 void setup()
 {
     Serial.begin(9600);
-    Serial.println("Servo Motor Test Starting...");
+    Serial.println("Sorting Manager Test Start...");
 
-    ServoMotor_Init(servo);
+    ObjectManager_Init(objMng);
+    SortingManager_Init(sorter);
+
+    // Optional: simulate the servo IR triggers with a delay for testing
+    // Real hardware would replace these with actual IR signals
 }
 
 void loop()
 {
-    Serial.println("Triggering servo (PUSH)");
-    ServoMotor_Trigger(servo);
+    // -------------------- Update Sorting Manager --------------------
+    SortingManager_Update(sorter);
 
-    delay(1000);
-
-    Serial.println("Resetting servo (HOME)");
-    ServoMotor_Reset(servo);
-
-    delay(2000);
+    if (Serial.available())
+    {
+        char ch = Serial.read();
+        if (ch == '1')
+        {
+            sorter.bin1.ir.event = true;
+        }
+        else if (ch == '2')
+        {
+            sorter.bin2.ir.event = true;
+        }
+        else if (ch == '3')
+        {
+            sorter.bin3.event = true;
+        }
+    }
 }
