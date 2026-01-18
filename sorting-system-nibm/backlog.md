@@ -201,3 +201,51 @@ void IrSensor_Update(IrSensor &ir)
 ```
 - If an event is already stored, it won't look for another event till the stored event got consumed.
 - The debounce done in the conditinoal block so it will be more consistant.
+
+# 2026-01-18
+
+## Design the Sorting Manager
+
+### Purpose
+
+The **Sorting Manager** is responsible for directing detected objects into their corresponding bins on the conveyor system.
+It operates as a **finite state machine (FSM)** and uses the **Object Manager** as a sub-system to obtain object detection and color classification information.
+
+### Responsibilities
+
+- Coordinate the complete sorting cycle for **one object at a time**.
+- Request and receive object color information from the **Object Manager**.
+- Control **two independent servo motors**, each assigned to a specific side bin.
+- Allow objects belonging to the remaining category to pass directly to the **end bin** without actuation.
+- Maintain and update an internal FSM to ensure deterministic and non-blocking operation.
+- Safely return the system to the **IDLE** state after each sorting cycle.
+
+### Finite State Machine (FSM)
+
+```c++
+enum class SortState {
+    IDLE,       // Waiting for an object
+    WAITING,    // Object detected and classified
+    ACTUATING,  // Servo motor is pushing the object
+    ERROR       // Fault or invalid condition
+};
+```
+
+### FSM Behavior
+
+- **IDLE**
+  - The system waits for the Object Manager to report a detected object.
+  - No actuators are active in this state.
+- **WAITING**
+  - The Sorting Manager retrieves the detected object’s color from the Object Manager.
+  - Based on the color, it determines the target bin:
+    - **Left Bin** → Servo Motor A
+    - **Right Bin** → Servo Motor B
+    - **End Bin** → No servo actuation
+- **ACTUATING**
+  - The corresponding servo motor is triggered to push the object into its assigned bin.
+  - Servo motion and reset are handled in a **non-blocking manner** using timing logic.
+  - After actuation, the system prepares to return to the IDLE state.
+- **ERROR**
+  - Entered when an unexpected or invalid condition occurs.
+  - Allows safe recovery or diagnostics.
