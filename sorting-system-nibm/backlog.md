@@ -137,6 +137,8 @@ The Servo Motor is responsible for pushing objects on the conveyor belt into the
 
 - Timing or duration can be configured depending on the object size or speed of the conveyor.
 
+- `Important` - The design got [updated](backlog.md#update-the-design-of-the-servo-motor) to cater the requirements of the Sorting System.
+
 ## Implement the Object Manager
 - Perform the physical testing ensuring all the states working properly.
 - Ensure safe transistions between the states, so it won't trigger duplicate events.
@@ -249,3 +251,24 @@ enum class SortState {
 - **ERROR**
   - Entered when an unexpected or invalid condition occurs.
   - Allows safe recovery or diagnostics.
+
+## Update the Design of the Servo Motor
+
+### Purpose
+
+The Servo Motor is responsible for physically diverting objects on the conveyor belt
+into their corresponding bins by pushing them into a specified direction.
+
+### Responsibilities
+
+- Move to a commanded position when triggered by the Sorting Manager.
+- Hold its position until an explicit reset command is received.
+- Return to the home/reset position only when instructed (e.g., after object passage
+  is confirmed by an IR sensor).
+- Provide stable and repeatable motion suitable for continuous operation.
+
+### Notes
+
+- The Servo Motor does not contain any timing logic or autonomous behavior.
+- All sequencing, timing, and decision-making are handled by the Sorting Manager FSM.
+- This abstraction keeps mechanical control simple and predictable.
