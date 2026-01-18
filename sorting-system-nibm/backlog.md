@@ -281,3 +281,32 @@ into their corresponding bins by pushing them into a specified direction.
     - Multiple readings with object manager without being processed with the sorting manager seems to add someking of queue and goes to a failed state in Object Manager.
     - [ ] - Make sure to add an LED to represent the 1 object per cycle rule.
     - [ ] - Perform a full test with all the IR and Servo Motors.
+
+## Design the Bin Manager
+### Purpose
+
+The Bin Manager is used to detect whether the Bins are full or not. These detections will be used to trigger the forklift system to reset the bin.
+
+### Responsibilities
+
+- Should constantly read the bin status.
+- Each bin should contain an IR sensor.
+- Take an average of the samples to maintain the accuracy.
+- Maintain and update the internal FSM to ensure deterministic and non-blocking operations.
+
+### Finite State Machine
+
+```c++
+enum class BinState {
+  IDLE,
+  FULL,
+  ERROR,
+}
+```
+
+- It should also maintain details about the full bin.
+
+### Note
+
+- Since there is only one object per cycle, there is no need to handle multiple bin-full situations simultaneously.
+- IR sensors should measure the real-time data, not any edge detecting mechanism.
