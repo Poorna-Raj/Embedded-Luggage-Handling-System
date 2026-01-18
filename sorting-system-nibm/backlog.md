@@ -272,3 +272,12 @@ into their corresponding bins by pushing them into a specified direction.
 - The Servo Motor does not contain any timing logic or autonomous behavior.
 - All sequencing, timing, and decision-making are handled by the Sorting Manager FSM.
 - This abstraction keeps mechanical control simple and predictable.
+
+## Implement the Sorting Manager
+- Implement the sorting manager including all the states.
+- A mock test has been executed with positive result - [code](test.md#sorting-manager-mock).
+- A complete test need to be initalized.
+- Ensure the Object Manager functions properly inside the Sorting Manager but had to face some issues where,
+    - Multiple readings with object manager without being processed with the sorting manager seems to add someking of queue and goes to a failed state in Object Manager.
+    - [ ] - Make sure to add an LED to represent the 1 object per cycle rule.
+    - [ ] - Perform a full test with all the IR and Servo Motors.
