@@ -1,27 +1,33 @@
 #include <Arduino.h>
+#include "utils/ServoMotor.h"
 
-#include "ObjectManager.h"
+// Adjust angles if needed
+constexpr uint8_t SERVO_PIN = 9;
+constexpr uint8_t RESET_ANGLE = 90;
+constexpr uint8_t PUSH_ANGLE = 30;
 
-ColorSensor cs = ColorSensor_Create(2, 3, 4);
-IrSensor ir = IrSensor_Create(7);
-
-ObjectManager objMng = ObjectManager_Create(ir, cs);
+ServoMotor servo = ServoMotor_Create(
+    SERVO_PIN,
+    RESET_ANGLE,
+    PUSH_ANGLE);
 
 void setup()
 {
     Serial.begin(9600);
-    ObjectManager_Init(objMng);
+    Serial.println("Servo Motor Test Starting...");
+
+    ServoMotor_Init(servo);
 }
 
 void loop()
 {
-    ObjectManager_Update(objMng);
+    Serial.println("Triggering servo (PUSH)");
+    ServoMotor_Trigger(servo);
 
-    if (ObjectManager_IsEventTrue(objMng))
-    {
-        Color cl = ObjectManager_GetColor(objMng);
-        Serial.println(cl == Color::RED ? "RED" : cl == Color::BLUE ? "BLUE"
-                                              : cl == Color::GREEN  ? "GREEN"
-                                                                    : "404");
-    }
+    delay(1000);
+
+    Serial.println("Resetting servo (HOME)");
+    ServoMotor_Reset(servo);
+
+    delay(2000);
 }
