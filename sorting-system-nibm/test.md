@@ -199,7 +199,7 @@ void loop()
 }
 ```
 
-# Sorting Manager
+# Sorting Manager (Mock)
 
 ```cpp
 #include <Arduino.h>
