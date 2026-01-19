@@ -248,22 +248,5 @@ void loop()
 {
     // -------------------- Update Sorting Manager --------------------
     SortingManager_Update(sorter);
-
-    if (Serial.available())
-    {
-        char ch = Serial.read();
-        if (ch == '1')
-        {
-            sorter.bin1.ir.event = true;
-        }
-        else if (ch == '2')
-        {
-            sorter.bin2.ir.event = true;
-        }
-        else if (ch == '3')
-        {
-            sorter.bin3.event = true;
-        }
-    }
 }
 ```
