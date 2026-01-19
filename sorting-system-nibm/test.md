@@ -167,34 +167,32 @@ void loop()
 #include <Arduino.h>
 #include "utils/ServoMotor.h"
 
-// Adjust angles if needed
+// Configuration
 constexpr uint8_t SERVO_PIN = 9;
-constexpr uint8_t RESET_ANGLE = 90;
-constexpr uint8_t PUSH_ANGLE = 30;
+constexpr uint8_t RESET_ANGLE = 30;
+constexpr uint8_t PUSH_ANGLE = 120;
 
-ServoMotor servo = ServoMotor_Create(
-    SERVO_PIN,
-    RESET_ANGLE,
-    PUSH_ANGLE);
+// Declare the instance globally
+ServoMotor myServo;
 
 void setup()
 {
     Serial.begin(9600);
     Serial.println("Servo Motor Test Starting...");
 
-    ServoMotor_Init(servo);
+    // Setup values and initialize
+    ServoMotor_Create(&myServo, SERVO_PIN, RESET_ANGLE, PUSH_ANGLE);
+    ServoMotor_Init(&myServo);
 }
 
 void loop()
 {
     Serial.println("Triggering servo (PUSH)");
-    ServoMotor_Trigger(servo);
-
+    ServoMotor_Trigger(&myServo);
     delay(1000);
 
     Serial.println("Resetting servo (HOME)");
-    ServoMotor_Reset(servo);
-
+    ServoMotor_Reset(&myServo);
     delay(2000);
 }
 ```
