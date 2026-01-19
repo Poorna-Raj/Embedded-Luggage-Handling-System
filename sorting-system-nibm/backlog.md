@@ -310,3 +310,16 @@ enum class BinState {
 
 - Since there is only one object per cycle, there is no need to handle multiple bin-full situations simultaneously.
 - IR sensors should measure the real-time data, not any edge detecting mechanism.
+
+# 2026-01-19
+
+## Rework on the Servo Motor
+- The servo motor needed a rework since the copy of the servo object didn't function properly.
+- Therefore, we moved the servo motor to pointers.
+
+## Update the sorting manager to handle updated servo motor
+- Rework on the sorting manager to use the servo motor as pointers.
+
+## Test the sorting manager with full hardware setup
+- Perform physic tests of the sorting manager to check all the states.
+- Find some issues where the IR sensors get auto triggered but might be an hardware issue where the IR sensor filker since they were too close. //TODO
