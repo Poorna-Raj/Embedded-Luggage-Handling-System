@@ -212,20 +212,25 @@ IrSensor ir = IrSensor_Create(7);             // Object detection IR
 ObjectManager objMng = ObjectManager_Create(ir, cs);
 
 // -------------------- Servo Motors --------------------
-constexpr uint8_t SERVO1_PIN = 5;  // Left bin
-constexpr uint8_t SERVO2_PIN = 11; // Right bin
+constexpr uint8_t SERVO1_PIN = 9; // Left bin
+constexpr uint8_t RESET1_ANGLE = 30;
+constexpr uint8_t PUSH1_ANGLE = 120;
 
-ServoMotor servo1 = ServoMotor_Create(SERVO1_PIN, 90, 30); // reset=90, push=30
-ServoMotor servo2 = ServoMotor_Create(SERVO2_PIN, 90, 30);
+constexpr uint8_t SERVO2_PIN = 11; // Right bin
+constexpr uint8_t RESET2_ANGLE = 30;
+constexpr uint8_t PUSH2_ANGLE = 120;
+
+ServoMotor redServo;
+ServoMotor greenServo;
 
 // -------------------- Bin IR sensors --------------------
-IrSensor bin1Ir = IrSensor_Create(9);
+IrSensor bin1Ir = IrSensor_Create(5);
 IrSensor bin2Ir = IrSensor_Create(10);
 IrSensor bin3Ir = IrSensor_Create(8); // End bin IR
 
 // -------------------- Hardware structs --------------------
-Hardware bin1 = {ir : bin1Ir, servo : servo1};
-Hardware bin2 = {ir : bin2Ir, servo : servo2};
+Hardware bin1 = {ir : bin1Ir, servo : &redServo};
+Hardware bin2 = {ir : bin2Ir, servo : &greenServo};
 
 // -------------------- Sorting Manager --------------------
 SortingManager sorter = SortingManager_Create(bin1, bin2, bin3Ir, objMng);
@@ -235,11 +240,10 @@ void setup()
     Serial.begin(9600);
     Serial.println("Sorting Manager Test Start...");
 
-    ObjectManager_Init(objMng);
-    SortingManager_Init(sorter);
+    ServoMotor_Create(&redServo, SERVO1_PIN, RESET1_ANGLE, PUSH1_ANGLE);
+    ServoMotor_Create(&greenServo, SERVO2_PIN, RESET2_ANGLE, PUSH2_ANGLE);
 
-    // Optional: simulate the servo IR triggers with a delay for testing
-    // Real hardware would replace these with actual IR signals
+    SortingManager_Init(sorter);
 }
 
 void loop()
