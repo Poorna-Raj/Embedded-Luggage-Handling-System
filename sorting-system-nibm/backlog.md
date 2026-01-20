@@ -323,3 +323,10 @@ enum class BinState {
 ## Test the sorting manager with full hardware setup
 - Perform physic tests of the sorting manager to check all the states.
 - Find some issues where the IR sensors get auto triggered but might be an hardware issue where the IR sensor filker since they were too close. //TODO
+
+# 2026-01-20
+
+## Implement the Bin Manager
+- Implement the states and all it's implementations.
+- Logic might need rework on physical constraints.
+- The averate threashold for bins might need a change.
