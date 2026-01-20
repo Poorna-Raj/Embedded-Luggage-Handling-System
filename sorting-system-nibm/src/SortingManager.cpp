@@ -1,10 +1,15 @@
 #include "SortingManager.h"
 
+// Forward declarations of internal state handlers
 void handleIdleState(SortingManager &mng);
 void handleWaitingState(SortingManager &mng);
-void handleAcutatingState(SortingManager &mng);
+void handleActuatingState(SortingManager &mng);
 void handleErrorState(SortingManager &mng);
 
+/**
+ * Creates the SortingManager instance.
+ * Note: Hardware references must be valid for the lifetime of this manager.
+ */
 SortingManager SortingManager_Create(Hardware &bin1, Hardware &bin2, IrSensor &bin3, ObjectManager &obj)
 {
     return SortingManager{
@@ -22,6 +27,10 @@ SortingManager SortingManager_Create(Hardware &bin1, Hardware &bin2, IrSensor &b
     };
 }
 
+/**
+ * Initializes all sub-components.
+ * Note: ServoMotor_Init now takes a pointer.
+ */
 void SortingManager_Init(SortingManager &mng)
 {
     if (mng.initialized)
@@ -33,17 +42,23 @@ void SortingManager_Init(SortingManager &mng)
     IrSensor_Init(mng.bin2.ir);
     IrSensor_Init(mng.bin3);
 
+    // Using pointers for the new ServoMotor logic
     ServoMotor_Init(mng.bin1.servo);
     ServoMotor_Init(mng.bin2.servo);
 
     mng.initialized = true;
+    Serial.println("Sorting Manager Initialized");
 }
 
+/**
+ * Main state machine update loop
+ */
 void SortingManager_Update(SortingManager &mng)
 {
     if (!mng.initialized)
         return;
 
+    // Update all sensors
     ObjectManager_Update(mng.mng);
     IrSensor_Update(mng.bin1.ir);
     IrSensor_Update(mng.bin2.ir);
@@ -58,12 +73,11 @@ void SortingManager_Update(SortingManager &mng)
         handleWaitingState(mng);
         break;
     case SortState::ACTUATING:
-        handleAcutatingState(mng);
+        handleActuatingState(mng);
         break;
     case SortState::ERROR:
         handleErrorState(mng);
         break;
-
     default:
         mng.state = SortState::ERROR;
         break;
@@ -75,15 +89,16 @@ void handleIdleState(SortingManager &mng)
     if (ObjectManager_IsEventTrue(mng.mng))
     {
         mng.color = ObjectManager_GetColor(mng.mng);
-        Serial.println("Color Detected");
 
         if (mng.color == Color::NONE)
         {
-            Serial.println("Invalid Color at Sorting Manager");
+            Serial.println("Sorting Error: Object detected but color is NONE");
             mng.state = SortState::ERROR;
         }
         else
         {
+            Serial.print("Object Detected. Color Code: ");
+            Serial.println((int)mng.color);
             mng.state = SortState::WAITING;
         }
     }
@@ -91,58 +106,70 @@ void handleIdleState(SortingManager &mng)
 
 void handleWaitingState(SortingManager &mng)
 {
-    Serial.println("In waiting state");
+    // Safety check
     if (mng.color == Color::NONE)
     {
-        Serial.println("Invalid Color at Sorting Manager");
         mng.state = SortState::ERROR;
         return;
     }
 
+    // Actuate the correct arm based on color
     if (mng.color == Color::RED)
     {
-        Serial.println("Trigger red");
+        Serial.println("Sorting to Bin 1 (RED)");
         ServoMotor_Trigger(mng.bin1.servo);
     }
     else if (mng.color == Color::BLUE)
     {
-        Serial.println("Trigger blue");
+        Serial.println("Sorting to Bin 2 (BLUE)");
         ServoMotor_Trigger(mng.bin2.servo);
+    }
+    else if (mng.color == Color::GREEN)
+    {
+        Serial.println("Sorting to Bin 3 (GREEN - No Servo)");
+        // Green doesn't have a servo in your current logic,
+        // it just waits for the IR sensor in Actuating state.
     }
 
     mng.state = SortState::ACTUATING;
 }
-void handleAcutatingState(SortingManager &mng)
+
+void handleActuatingState(SortingManager &mng)
 {
+    // Bin 1 logic (RED)
     if (mng.color == Color::RED && IrSensor_IsEventTrue(mng.bin1.ir))
     {
-        Serial.println("Got for red bin IR");
+        Serial.println("Item entered Bin 1. Resetting Servo.");
         ServoMotor_Reset(mng.bin1.servo);
-        mng.color = Color::NONE;
         mng.bin1Count++;
+        mng.color = Color::NONE;
         mng.state = SortState::IDLE;
     }
+    // Bin 2 logic (BLUE)
     else if (mng.color == Color::BLUE && IrSensor_IsEventTrue(mng.bin2.ir))
     {
-        Serial.println("Got for blue bin IR");
+        Serial.println("Item entered Bin 2. Resetting Servo.");
         ServoMotor_Reset(mng.bin2.servo);
-        mng.color = Color::NONE;
         mng.bin2Count++;
+        mng.color = Color::NONE;
         mng.state = SortState::IDLE;
     }
+    // Bin 3 logic (GREEN - Passive bin)
     else if (mng.color == Color::GREEN && IrSensor_IsEventTrue(mng.bin3))
     {
-        Serial.println("Got for green bin IR");
-        mng.color = Color::NONE;
+        Serial.println("Item entered Bin 3 (Passive).");
         mng.bin3Count++;
+        mng.color = Color::NONE;
         mng.state = SortState::IDLE;
     }
 }
+
 void handleErrorState(SortingManager &mng)
 {
     if (!mng.errorPrint)
     {
-        Serial.println("Something went wrong at Sorting Manager :: ERROR");
+        Serial.println("CRITICAL: Sorting Manager entered ERROR state.");
         mng.errorPrint = true;
     }
+    // Logic could be added here to pulse an LED or wait for a reset button
 }

@@ -2,7 +2,6 @@
 
 #include "utils/IrSensor.h"
 #include "utils/ServoMotor.h"
-// #include "utils/Led.h"
 #include "ObjectManager.h"
 
 enum class SortState
@@ -16,7 +15,7 @@ enum class SortState
 struct Hardware
 {
     IrSensor &ir;
-    ServoMotor &servo;
+    ServoMotor *servo;
 };
 
 struct SortingManager
@@ -26,7 +25,6 @@ struct SortingManager
     IrSensor &bin3;
 
     SortState state;
-
     ObjectManager &mng;
     Color color;
 
@@ -35,11 +33,10 @@ struct SortingManager
     unsigned long bin3Count;
 
     bool errorPrint;
-
     bool initialized;
 };
 
+// Functions remain the same in signature
 SortingManager SortingManager_Create(Hardware &bin1, Hardware &bin2, IrSensor &bin3, ObjectManager &obj);
-
 void SortingManager_Init(SortingManager &mng);
 void SortingManager_Update(SortingManager &mng);
