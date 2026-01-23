@@ -330,3 +330,9 @@ enum class BinState {
 - Implement the states and all it's implementations.
 - Logic might need rework on physical constraints.
 - The averate threashold for bins might need a change.
+
+# 2026-01-23
+
+## Test the Bin Manager
+- Test the bin manager code for all states.
+- Test code also written - [code](test.md#bin-manager-test)
