@@ -3,8 +3,14 @@
 #include "comm/TcpManager.h"
 #include "comm/CommManager.h"
 
-const char *SSID = "SLT-Fiber-2.4G-0A6C";
-const char *PASSWORD = "873399703%";
+#include "SortingManager.h"
+#include "BinManager.h"
+#include "SystemManager.h"
+
+#include "utils/GearMotor.h"
+
+constexpr char *SSID = "SLT-Fiber-2.4G-0A6C";
+constexpr char *PASSWORD = "873399703%";
 
 WiFiManager wifi{
     .ssid = SSID,
@@ -25,59 +31,52 @@ CommManager comm{
     .isMessageSent = false,
     .initialized = false,
 };
+// -------------------- Object Manager --------------------
+ColorSensor cs = ColorSensor_Create(2, 3, 4);
+IrSensor ir = IrSensor_Create(7);
 
-unsigned long lastTestTime = 0;
-uint8_t testStep = 0;
+ObjectManager objMng = ObjectManager_Create(ir, cs);
+
+// -------------------- Servo Motors --------------------
+constexpr uint8_t SERVO1_PIN = 9; // Left bin
+constexpr uint8_t RESET1_ANGLE = 30;
+constexpr uint8_t PUSH1_ANGLE = 120;
+
+constexpr uint8_t SERVO2_PIN = 11; // Right bin
+constexpr uint8_t RESET2_ANGLE = 30;
+constexpr uint8_t PUSH2_ANGLE = 120;
+
+ServoMotor redServo;
+ServoMotor greenServo;
+
+// -------------------- Bin IR sensors --------------------
+IrSensor bin1Ir = IrSensor_Create(5);
+IrSensor bin2Ir = IrSensor_Create(10);
+IrSensor bin3Ir = IrSensor_Create(8);
+
+// -------------------- Hardware structs --------------------
+Hardware bin1 = {ir : bin1Ir, servo : &redServo};
+Hardware bin2 = {ir : bin2Ir, servo : &greenServo};
+
+// -------------------- Sorting Manager --------------------
+SortingManager sorter = SortingManager_Create(bin1, bin2, bin3Ir, objMng);
+
+// -------------------- Bin Manager ------------------------
+BinManager binMng = BinManager_Create(bin1Ir, bin2Ir, bin3Ir);
+
+// -------------------- Convayer Gear Motor ---------------
+GearMotor motor = GearMotor_Create(12, 13);
+
+// -------------------- System Manager ---------------------
+SystemManager mng = SystemManager_Create(&wifi, &tcp, &comm, &binMng, &sorter);
 
 void setup()
 {
     Serial.begin(9600);
-    delay(1000);
-
-    Serial.println("=== COMM SYSTEM TEST START ===");
-
-    WiFiManager_Init(wifi);
-    TcpManager_Init(tcp);
-    CommManager_Init(comm);
+    SystemManager_Init(mng);
 }
 
 void loop()
 {
-    WiFiManager_Update(wifi);
-    TcpManager_Update(tcp);
-    CommManager_Update(comm);
-
-    if (!WiFiManager_IsConnected(wifi))
-        return;
-
-    // Run tests every 5 seconds
-    if (millis() - lastTestTime < 5000)
-        return;
-
-    lastTestTime = millis();
-
-    switch (testStep)
-    {
-    case 0:
-        Serial.println("[TEST] Trigger BIN 1 FULL");
-        CommManager_NotifyBinFull(comm, 1);
-        break;
-
-    case 1:
-        Serial.println("[TEST] Trigger BIN 2 FULL");
-        CommManager_NotifyBinFull(comm, 2);
-        break;
-
-    case 2:
-        Serial.println("[TEST] Trigger BIN 3 FULL");
-        CommManager_NotifyBinFull(comm, 3);
-        break;
-
-    case 3:
-        Serial.println("[TEST] All tests triggered. Waiting for DONE/FAILED responses.");
-        break;
-    }
-
-    if (testStep < 3)
-        testStep++;
+    SystemManager_Update(mng);
 }
