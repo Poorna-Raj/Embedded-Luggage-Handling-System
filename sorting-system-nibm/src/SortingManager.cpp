@@ -38,10 +38,6 @@ void SortingManager_Init(SortingManager &mng)
 
     ObjectManager_Init(mng.mng);
 
-    IrSensor_Init(mng.bin1.ir);
-    IrSensor_Init(mng.bin2.ir);
-    IrSensor_Init(mng.bin3);
-
     // Using pointers for the new ServoMotor logic
     ServoMotor_Init(mng.bin1.servo);
     ServoMotor_Init(mng.bin2.servo);
@@ -60,9 +56,6 @@ void SortingManager_Update(SortingManager &mng)
 
     // Update all sensors
     ObjectManager_Update(mng.mng);
-    IrSensor_Update(mng.bin1.ir);
-    IrSensor_Update(mng.bin2.ir);
-    IrSensor_Update(mng.bin3);
 
     switch (mng.state)
     {

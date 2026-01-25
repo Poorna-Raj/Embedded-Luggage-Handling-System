@@ -26,10 +26,6 @@ void BinManager_Init(BinManager &bmn)
     if (bmn.initialized)
         return;
 
-    IrSensor_Init(bmn.bin1Ir);
-    IrSensor_Init(bmn.bin2Ir);
-    IrSensor_Init(bmn.bin3Ir);
-
     bmn.initialized = true;
 }
 
@@ -77,10 +73,6 @@ void handleBinManagerIdle(BinManager &bmn)
 {
     bmn.isErrorPrint = false;
     bmn.isFullPrint = false;
-
-    IrSensor_Update(bmn.bin1Ir);
-    IrSensor_Update(bmn.bin2Ir);
-    IrSensor_Update(bmn.bin3Ir);
 
     // BIN 1
     if (IrSensor_IsDetected(bmn.bin1Ir))
