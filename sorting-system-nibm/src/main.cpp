@@ -1,27 +1,83 @@
 #include <Arduino.h>
-#include "utils/IrSensor.h"
+#include "comm/WiFiManager.h"
+#include "comm/TcpManager.h"
+#include "comm/CommManager.h"
 
-const uint8_t IR_PIN = 0;
-IrSensor ir = IrSensor_Create(IR_PIN);
+const char *SSID = "SLT-Fiber-2.4G-0A6C";
+const char *PASSWORD = "873399703%";
+
+WiFiManager wifi{
+    .ssid = SSID,
+    .password = PASSWORD,
+    .connected = false,
+    .initialized = false,
+};
+
+TcpManager tcp{
+    .server = WiFiServer(8080),
+    .client = WiFiClient(),
+    .port = 8080,
+};
+
+CommManager comm{
+    .tcpManager = tcp,
+    .state = CommManagerState::ACTIVE,
+    .isMessageSent = false,
+    .initialized = false,
+};
+
+unsigned long lastTestTime = 0;
+uint8_t testStep = 0;
 
 void setup()
 {
     Serial.begin(9600);
-    IrSensor_Init(ir);
-    Serial.println("IR Sensor Manual Test Started!");
-    Serial.println("Cover or unblock the sensor to trigger events...");
-    pinMode(12,OUTPUT);
+    delay(1000);
+
+    Serial.println("=== COMM SYSTEM TEST START ===");
+
+    WiFiManager_Init(wifi);
+    TcpManager_Init(tcp);
+    CommManager_Init(comm);
 }
 
 void loop()
 {
-    // Update the sensor reading
-    IrSensor_Update(ir);
+    WiFiManager_Update(wifi);
+    TcpManager_Update(tcp);
+    CommManager_Update(comm);
 
-    // Check if a rising/falling event occurred
-    if (IrSensor_IsEventTrue(ir))
+    if (!WiFiManager_IsConnected(wifi))
+        return;
+
+    // Run tests every 5 seconds
+    if (millis() - lastTestTime < 5000)
+        return;
+
+    lastTestTime = millis();
+
+    switch (testStep)
     {
-        Serial.println("IR Sensor EVENT triggered!");
+    case 0:
+        Serial.println("[TEST] Trigger BIN 1 FULL");
+        CommManager_NotifyBinFull(comm, 1);
+        break;
+
+    case 1:
+        Serial.println("[TEST] Trigger BIN 2 FULL");
+        CommManager_NotifyBinFull(comm, 2);
+        break;
+
+    case 2:
+        Serial.println("[TEST] Trigger BIN 3 FULL");
+        CommManager_NotifyBinFull(comm, 3);
+        break;
+
+    case 3:
+        Serial.println("[TEST] All tests triggered. Waiting for DONE/FAILED responses.");
+        break;
     }
-    digitalWrite(12, HIGH);
+
+    if (testStep < 3)
+        testStep++;
 }
