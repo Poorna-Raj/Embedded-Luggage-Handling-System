@@ -1,35 +1,27 @@
 #include <Arduino.h>
-#include "BinManager.h"
+#include "utils/IrSensor.h"
 
-IrSensor bin1Ir = IrSensor_Create(4);
-IrSensor bin2Ir = IrSensor_Create(5);
-IrSensor bin3Ir = IrSensor_Create(14);
-
-BinManager binMng = BinManager_Create(bin1Ir, bin2Ir, bin3Ir);
+const uint8_t IR_PIN = 0;
+IrSensor ir = IrSensor_Create(IR_PIN);
 
 void setup()
 {
     Serial.begin(9600);
-    Serial.println("Sorting Manager Test Start...");
-
-    BinManager_Init(binMng);
+    IrSensor_Init(ir);
+    Serial.println("IR Sensor Manual Test Started!");
+    Serial.println("Cover or unblock the sensor to trigger events...");
+    pinMode(12,OUTPUT);
 }
 
 void loop()
 {
-    BinManager_Update(binMng);
-    if (BinManager_GetState(binMng) == BinManagerState::FULL)
+    // Update the sensor reading
+    IrSensor_Update(ir);
+
+    // Check if a rising/falling event occurred
+    if (IrSensor_IsEventTrue(ir))
     {
-        Serial.println(BinManager_GetBin(binMng) == Bin::BIN_1 ? "1" : BinManager_GetBin(binMng) == Bin::BIN_2 ? "2"
-                                                                   : BinManager_GetBin(binMng) == Bin::BIN_3   ? "3"
-                                                                                                               : "NONE");
-        if (Serial.available())
-        {
-            char ch = Serial.read();
-            if (ch == 'o')
-            {
-                BinManager_OnCompleted(binMng);
-            }
-        }
+        Serial.println("IR Sensor EVENT triggered!");
     }
+    digitalWrite(12, HIGH);
 }
