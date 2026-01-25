@@ -5,7 +5,7 @@ void handleFullState(SystemManager &sm);
 void handleWaitingState(SystemManager &sm);
 void handleErrorState(SystemManager &sm);
 
-SystemManager SystemManager_Create(WiFiManager *w, TcpManager *t, CommManager *cm, BinManager *b, SortingManager *sm)
+SystemManager SystemManager_Create(WiFiManager *w, TcpManager *t, CommManager *cm, BinManager *b, SortingManager *sm, GearMotor &gm)
 {
     return SystemManager{
         .wifi = w,
@@ -13,6 +13,7 @@ SystemManager SystemManager_Create(WiFiManager *w, TcpManager *t, CommManager *c
         .comm = cm,
         .binMng = b,
         .sortMng = sm,
+        .gm = gm,
         .state = SystemState::WAITING,
         .initialize = false,
     };
