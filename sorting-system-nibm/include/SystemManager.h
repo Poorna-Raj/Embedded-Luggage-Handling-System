@@ -1,8 +1,11 @@
 #include <Arduino.h>
 #include "comm/WiFiManager.h"
 #include "comm/CommManager.h"
+
 #include "BinManager.h"
 #include "SortingManager.h"
+
+#include "utils/GearMotor.h"
 
 enum class SystemState
 {
@@ -20,6 +23,8 @@ struct SystemManager
 
     BinManager *binMng;
     SortingManager *sortMng;
+
+    GearMotor &gm;
 
     SystemState state;
     bool initialize;
