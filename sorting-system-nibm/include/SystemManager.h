@@ -30,6 +30,6 @@ struct SystemManager
     bool initialize;
 };
 
-SystemManager SystemManager_Create(WiFiManager *w, TcpManager *t, CommManager *cm, BinManager *b, SortingManager *sm);
+SystemManager SystemManager_Create(WiFiManager *w, TcpManager *t, CommManager *cm, BinManager *b, SortingManager *sm, GearMotor &gm);
 void SystemManager_Init(SystemManager &sm);
 void SystemManager_Update(SystemManager &sm);
