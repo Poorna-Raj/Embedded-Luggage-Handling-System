@@ -8,7 +8,8 @@ GearMotor GearMotor_Create(uint8_t pwmPin)
         .hasDirPin = false,
         .speed = 0,
         .state = GearMotorState::STOPPED,
-        .initialized = false};
+        .initialized = false
+    };
 }
 
 GearMotor GearMotor_Create(uint8_t pwmPin, uint8_t dirPin)
@@ -19,7 +20,8 @@ GearMotor GearMotor_Create(uint8_t pwmPin, uint8_t dirPin)
         .hasDirPin = true,
         .speed = 0,
         .state = GearMotorState::STOPPED,
-        .initialized = false};
+        .initialized = false
+    };
 }
 
 void GearMotor_Init(GearMotor &m)
@@ -32,10 +34,10 @@ void GearMotor_Init(GearMotor &m)
     if (m.hasDirPin)
     {
         pinMode(m.dirPin, OUTPUT);
-        digitalWrite(m.dirPin, HIGH);
+        digitalWrite(m.dirPin, HIGH);  // Default direction HIGH (FORWARD)
     }
 
-    analogWrite(m.pwmPin, 0);
+    analogWrite(m.pwmPin, 0);  // Initialize the motor to STOPPED
     m.state = GearMotorState::STOPPED;
     m.initialized = true;
 }
@@ -47,29 +49,37 @@ void GearMotor_Update(GearMotor &m)
 
     if (m.state == GearMotorState::RUNNING)
     {
-        analogWrite(m.pwmPin, m.speed);
+        analogWrite(m.pwmPin, m.speed);  // Set speed if running
     }
     else
     {
-        analogWrite(m.pwmPin, 0);
+        analogWrite(m.pwmPin, 0);  // Stop the motor if it's not running
     }
 }
 
-void GearMotor_Run(GearMotor &m)
-{
-    GearMotor_Run(m, 255);
-}
-
-void GearMotor_Run(GearMotor &m, uint8_t speed)
+void GearMotor_Run(GearMotor &m, uint8_t speed, GearMotorDirection direction)
 {
     m.speed = speed;
     m.state = GearMotorState::RUNNING;
+
+    // Set motor direction
+    if (m.hasDirPin)
+    {
+        if (direction == GearMotorDirection::FORWARD)
+            digitalWrite(m.dirPin, HIGH);  // Set direction forward
+        else
+            digitalWrite(m.dirPin, LOW);  // Set direction backward
+    }
+
+    GearMotor_Update(m);  // Apply the changes to motor
 }
+
 
 void GearMotor_Stop(GearMotor &m)
 {
     m.speed = 0;
     m.state = GearMotorState::STOPPED;
+    GearMotor_Update(m);  // Stop the motor
 }
 
 bool GearMotor_IsRunning(const GearMotor &m)
