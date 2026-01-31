@@ -35,6 +35,8 @@ void SystemManager_Init(SystemManager &sm)
     SortingManager_Init(*sm.sortMng);
     BinManager_Init(*sm.binMng);
 
+    GearMotor_Init(sm.gm);  // Ensure motor is initialized
+
     sm.initialize = true;
 }
 
@@ -76,18 +78,19 @@ void SystemManager_Update(SystemManager &sm)
 
 void handleIdleState(SystemManager &sm)
 {
-    // convayer belt running
-    GearMotor_Run(sm.gm);
+    // Conveyor belt running forward
+    GearMotor_Run(sm.gm, 128, GearMotorDirection::FORWARD);  // Run motor forward at speed 128
 
     if (BinManager_GetState(*sm.binMng) == BinManagerState::FULL)
     {
         sm.state = SystemState::FULL;
     }
 }
+
 void handleFullState(SystemManager &sm)
 {
-    GearMotor_Stop(sm.gm);
-    // send the bin message
+    GearMotor_Stop(sm.gm);  // Stop motor when the bin is full
+    // Send the bin message
     Bin fullBin = BinManager_GetBin(*sm.binMng);
 
     if (fullBin == Bin::NONE)
@@ -109,16 +112,18 @@ void handleFullState(SystemManager &sm)
         sm.state = SystemState::WAITING;
     }
 }
+
 void handleWaitingState(SystemManager &sm)
 {
-    GearMotor_Stop(sm.gm);
+    GearMotor_Stop(sm.gm);  // Stop motor while waiting
     if (CommManager_GetState(*sm.comm) == CommManagerState::ACTIVE)
     {
         sm.state = SystemState::IDLE;
     }
 }
+
 void handleErrorState(SystemManager &sm)
 {
-    GearMotor_Stop(sm.gm);
+    GearMotor_Stop(sm.gm);  // Stop motor if there's an error
     Serial.println("Error at System Manager");
 }
