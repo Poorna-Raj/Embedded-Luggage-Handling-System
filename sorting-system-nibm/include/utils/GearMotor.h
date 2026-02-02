@@ -15,17 +15,16 @@ enum class GearMotorState
 
 struct GearMotor
 {
-    uint8_t pwmPin;
-    uint8_t dirPin;
-    bool hasDirPin;
-    uint8_t speed;
+    uint8_t pwmPin;   // Pin for PWM speed control
+    uint8_t dirPin1;  // Pin for direction control 1 (IN1)
+    uint8_t dirPin2;  // Pin for direction control 2 (IN2)
+    bool hasDirPins;  // Flag for direction pins
+    uint8_t speed;    // Motor speed (0-255 for PWM)
     GearMotorState state;
     bool initialized;
 };
 
-GearMotor GearMotor_Create(uint8_t pwmPin);
-GearMotor GearMotor_Create(uint8_t pwmPin, uint8_t dirPin);
-
+GearMotor GearMotor_Create(uint8_t pwmPin, uint8_t dirPin1, uint8_t dirPin2);
 void GearMotor_Init(GearMotor &m);
 void GearMotor_Update(GearMotor &m);
 
