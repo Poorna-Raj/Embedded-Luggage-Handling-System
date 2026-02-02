@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include "utils/IrSensor.h"
 #include "utils/ColorSensor.h"
 
@@ -20,10 +21,6 @@ struct ObjectManager
     Color preColor;
 
     bool initialized;
-
-    bool detectedPrinted;
-    bool failedPrinted;
-
     bool eventConsumed;
 };
 
