@@ -378,3 +378,43 @@ void loop()
         testStep++;
 }
 ```
+
+# Servo Test
+```cpp
+#include <Arduino.h>
+
+#include "utils/ColorSensor.h"
+#include "utils/GearMotor.h"
+
+// Pin assignments for the color sensor (optional if not used)
+ColorSensor cs = ColorSensor_Create(D4, D2, D6);
+
+// Pin assignments for motor driver
+const uint8_t pwmPin = D0;   // GPIO D0 for PWM control
+const uint8_t dirPin = D3;   // GPIO D3 for direction control
+
+// Create the motor (use correct pins for motor)
+GearMotor motor = GearMotor_Create(pwmPin, dirPin);  // Example: PWM on D0, Direction on D3
+
+void setup() {
+    Serial.begin(9600);  // Start serial communication for debugging
+    GearMotor_Init(motor);  // Initialize the motor
+}
+
+void loop() {
+    // Run motor forward at speed 200 (out of 255)
+    GearMotor_Run(motor, 250, GearMotorDirection::FORWARD);  
+    Serial.println("Motor running forward at speed 200");
+    delay(2000);  // Run for 2 seconds
+
+    // Run motor backward at speed 100
+    GearMotor_Run(motor, 100, GearMotorDirection::BACKWARD);  
+    Serial.println("Motor running backward at speed 100");
+    delay(2000);  // Run for 2 seconds
+
+    // Stop motor
+    GearMotor_Stop(motor);  
+    Serial.println("Motor stopped");
+    delay(1000);  // Wait for 1 second before restarting
+}
+```
